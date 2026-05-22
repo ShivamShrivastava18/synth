@@ -1,0 +1,37 @@
+# Secrets
+.env
+.env.*
+service-account-*.json
+*.tfstate
+*.tfstate.backup
+~/.kaggle/kaggle.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+
+# Data
+*.parquet
+*.csv
+*.zip
+data/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
