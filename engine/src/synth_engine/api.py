@@ -101,12 +101,7 @@ def validate_endpoint(req: ValidateReq):
 
     tstr: Optional[float] = None
     if req.target_col is not None:
-        try:
-            tstr = compute_tstr_auc(synth_df, real_df, req.target_col)
-        except Exception:
-            # TSTR computation can fail for string-label targets with some
-            # XGBoost versions; surface None rather than a 500 error.
-            tstr = None
+        tstr = compute_tstr_auc(synth_df, real_df, req.target_col)
 
     ks_avg = compute_ks_avg(synth_df, real_df)
     js_avg = compute_js_avg(synth_df, real_df)

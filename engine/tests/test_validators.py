@@ -7,6 +7,26 @@ from synth_engine.validators.tstr import compute_tstr_auc
 from synth_engine.validators.ks_js import compute_ks_avg, compute_js_avg
 
 
+def test_tstr_handles_string_multiclass_target():
+    """Regression: real Lending Club loan_status is a 7-class string column."""
+    rng = np.random.default_rng(0)
+    n = 800
+    labels = ["Fully Paid", "Current", "Charged Off"]
+    probs = [0.6, 0.25, 0.15]
+    real = pd.DataFrame({
+        "amount": rng.normal(15_000, 5_000, n),
+        "rate": rng.normal(12.5, 3.0, n),
+        "income": rng.normal(70_000, 20_000, n),
+    })
+    real["status"] = rng.choice(labels, n, p=probs)
+    # synth is real with small noise — TSTR should be informative (>0.5)
+    synth = real.copy()
+    synth["amount"] += rng.normal(0, 100, n)
+    auc = compute_tstr_auc(synth, real, target_col="status")
+    assert not np.isnan(auc), "TSTR should return a finite value for string targets"
+    assert 0.0 <= auc <= 1.0, f"AUC out of range: {auc}"
+
+
 def test_dcr_min_is_high_for_independent_data():
     rng = np.random.default_rng(0)
     real = pd.DataFrame(rng.normal(0, 1, (500, 4)), columns=list("abcd"))
