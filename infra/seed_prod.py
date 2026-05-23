@@ -18,7 +18,10 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-CSV_PATH = Path.home() / "Downloads" / "lending-club" / "accepted_2007_to_2018Q4.csv"
+CSV_PATH = (
+    Path.home() / "Downloads" / "lending-club"
+    / "accepted_2007_to_2018q4.csv" / "accepted_2007_to_2018Q4.csv"
+)
 TABLE = "loan_applications"
 N_ROWS = 100_000
 DROP_TEXT_COLS = {"desc", "title", "emp_title", "url", "zip_code", "addr_state"}
