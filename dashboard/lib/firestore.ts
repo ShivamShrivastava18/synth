@@ -1,14 +1,23 @@
-import { initializeApp, cert, getApps, applicationDefault } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { initializeApp, getApps, applicationDefault } from "firebase-admin/app";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
-if (!getApps().length) {
-  initializeApp({
-    projectId: process.env.GCP_PROJECT_ID || "synth-hackathon-2026",
-    credential: applicationDefault(),
-  });
+let _db: Firestore | null = null;
+
+/**
+ * Lazy Firestore client. Initialized on first call so that Next.js static
+ * analysis at build time doesn't try to authenticate.
+ */
+export function db(): Firestore {
+  if (_db) return _db;
+  if (!getApps().length) {
+    initializeApp({
+      projectId: process.env.GCP_PROJECT_ID || "synth-hackathon-2026",
+      credential: applicationDefault(),
+    });
+  }
+  _db = getFirestore();
+  return _db;
 }
-
-export const db = getFirestore();
 
 export function tsToIso(
   ts: FirebaseFirestore.Timestamp | { _seconds: number; _nanoseconds: number } | null | undefined,

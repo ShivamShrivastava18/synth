@@ -3,9 +3,10 @@ import { db, tsToIso } from "@/lib/firestore";
 import type { RunDocClient } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
-  const snap = await db
+  const snap = await db()
     .collection("runs")
     .orderBy("created_at", "desc")
     .limit(50)
