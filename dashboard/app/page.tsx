@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
-import { Wordmark } from "@/components/Wordmark";
+import { Sidebar } from "@/components/Sidebar";
+import { TopBar } from "@/components/TopBar";
 import { RunsList } from "@/components/RunsList";
-import { MetricsTable } from "@/components/MetricsTable";
+import { MetricCard } from "@/components/MetricCard";
 import { DistributionPlots } from "@/components/DistributionPlots";
-import { StatusGlyph } from "@/components/StatusGlyph";
+import { StatusDot } from "@/components/StatusDot";
+import { Button } from "@/components/Button";
 import { fmtAbsolute, fmtRunId } from "@/lib/format";
-import type { RunDocClient } from "@/lib/types";
+import { THRESHOLDS, type RunDocClient } from "@/lib/types";
 
 export default function Page() {
   const [runs, setRuns] = useState<RunDocClient[]>([]);
@@ -19,7 +21,6 @@ export default function Page() {
     setBusy(true);
     try {
       await fetch(`/api/runs/${id}/${kind}`, { method: "POST" });
-      // Optimistic local update — list also polls every 4s.
       setRuns((rs) =>
         rs.map((r) =>
           r.id === id
@@ -37,62 +38,54 @@ export default function Page() {
   }
 
   return (
-    <main className="mx-auto max-w-[1080px] px-8 py-14">
-      {/* ─── Masthead ───────────────────────────────────────────────────── */}
-      <header className="flex items-end justify-between pb-6">
-        <div>
-          <Wordmark />
-          <p className="font-display italic text-ink-muted text-[15px] mt-1.5">
-            autonomous synthetic data &middot; the agent&rsquo;s daily record
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="kicker">Run log</p>
-          <p className="font-mono text-[12px] text-ink-muted mt-1 tabular">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-        </div>
-      </header>
+    <div className="flex min-h-screen">
+      <Sidebar />
 
-      <DoubleRule />
+      <div className="flex-1 min-w-0">
+        <TopBar
+          crumbs={[
+            { label: "synth-hackathon-2026", muted: true },
+            { label: "Runs" },
+            ...(selected ? [{ label: fmtRunId(selected.id), muted: true }] : []),
+          ]}
+          right={
+            <Button variant="ghost" size="sm">
+              <span>New run</span>
+              <kbd className="f-mono text-2xs text-fg-faint border border-border-soft px-1 rounded-xs ml-1">
+                N
+              </kbd>
+            </Button>
+          }
+        />
 
-      {/* ─── Recent runs ────────────────────────────────────────────────── */}
-      <section className="py-6">
-        <SectionLabel kicker="Section I" title="Recent runs" />
-        <div className="mt-3">
+        <main className="px-6 py-5 max-w-[1280px]">
+          {/* ─── Page heading ─────────────────────────────────────────── */}
+          <section className="mb-5 flex items-baseline justify-between">
+            <div>
+              <h1 className="text-xl font-semibold text-fg tracking-tighter">Runs</h1>
+              <p className="text-sm text-fg-muted mt-0.5">
+                Synthetic-data runs across all sources.{" "}
+                <span className="text-fg-faint">{runs.length} total</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm">All sources</Button>
+              <Button variant="ghost" size="sm">All status</Button>
+            </div>
+          </section>
+
           <RunsList
             selectedId={selectedId}
             onSelect={setSelectedId}
             onRunsLoaded={setRuns}
           />
-        </div>
-      </section>
 
-      {selected && (
-        <>
-          <DoubleRule />
-          <RunDetail run={selected} onVerdict={verdict} busy={busy} />
-        </>
-      )}
-
-      <DoubleRule />
-      <footer className="pt-6 flex items-baseline justify-between font-mono text-[11px] text-ink-faint uppercase tracking-kicker">
-        <span>Synth &middot; rapid-agent hackathon &middot; Fivetran track</span>
-        <span>
-          <a
-            href="https://github.com/ShivamShrivastava18/synth"
-            className="text-ink-muted hover:text-accent"
-          >
-            github / synth
-          </a>
-        </span>
-      </footer>
-    </main>
+          {selected && (
+            <RunDetail run={selected} onVerdict={verdict} busy={busy} />
+          )}
+        </main>
+      </div>
+    </div>
   );
 }
 
@@ -107,121 +100,123 @@ function RunDetail({
 }) {
   const pending = run.status === "awaiting_approval";
   return (
-    <article className="py-8">
-      <SectionLabel kicker={`Run №${fmtRunId(run.id)}`} title={null} />
+    <section className="mt-8 space-y-6">
+      <hr className="hr" />
 
-      <h1 className="font-display text-[56px] leading-[1.05] tracking-tightest text-ink mt-2">
-        {run.source_table}
-        <span className="text-ink-faint font-display italic font-normal">
-          {" "}
-          →{" "}
-        </span>
-        {run.destination_table}
-      </h1>
-
-      <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2 font-mono text-[13px] text-ink-muted">
-        <span>
-          <span className="text-ink-faint">engine </span>
-          <span className="text-ink">{run.engine}</span>
-          {run.retry_count > 0 && (
-            <span className="text-accent"> · retry {run.retry_count}</span>
-          )}
-        </span>
-        <span>
-          <span className="text-ink-faint">trigger </span>
-          <span className="text-ink">{run.trigger}</span>
-        </span>
-        <span>
-          <span className="text-ink-faint">created </span>
-          <span className="text-ink tabular">{fmtAbsolute(run.created_at)}</span>
-        </span>
-        <span>
-          <StatusGlyph status={run.status} />
-        </span>
-      </div>
-
-      {/* ─── Fidelity ─────────────────────────────────────────────────── */}
-      <section className="mt-10">
-        <SectionLabel kicker="Section II" title="Fidelity assessment" />
-        <div className="mt-4">
-          <MetricsTable metrics={run.metrics} />
+      {/* ─── Run header card ──────────────────────────────────────────── */}
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <p className="kicker">Run · {fmtRunId(run.id)}</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tighter text-fg">
+            <span>{run.source_table}</span>
+            <span className="text-fg-dim mx-2 font-normal">→</span>
+            <span className="text-fg-muted">{run.destination_table}</span>
+          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-fg-muted">
+            <span className="flex items-center gap-1.5">
+              <StatusDot status={run.status} />
+            </span>
+            <Sep />
+            <span>
+              <span className="text-fg-faint">engine</span>{" "}
+              <span className="f-mono text-fg">{run.engine}</span>
+              {run.retry_count > 0 && (
+                <span className="f-mono text-warn ml-1">↻{run.retry_count}</span>
+              )}
+            </span>
+            <Sep />
+            <span>
+              <span className="text-fg-faint">trigger</span>{" "}
+              <span className="f-mono text-fg">{run.trigger}</span>
+            </span>
+            <Sep />
+            <span className="f-mono text-fg-muted tab">{fmtAbsolute(run.created_at)}</span>
+          </div>
         </div>
-      </section>
 
-      {/* ─── Figures ──────────────────────────────────────────────────── */}
-      <section className="mt-10">
-        <SectionLabel kicker="Section III" title="Distribution comparison" />
-        <div className="mt-5">
-          <DistributionPlots
-            runId={run.id}
-            sourceTable={run.source_table}
-            columns={run.plot_columns?.slice(0, 4) ?? []}
-          />
-        </div>
-      </section>
-
-      {/* ─── Verdict ──────────────────────────────────────────────────── */}
-      <section className="mt-12">
-        <SectionLabel kicker="Section IV" title="Verdict" />
         {pending ? (
-          <div className="mt-5 flex items-center gap-4 flex-wrap">
-            <button
-              disabled={busy}
-              onClick={() => onVerdict(run.id, "approve")}
-              className="font-mono uppercase tracking-kicker text-[12px] px-6 py-3 border-2 border-ink text-ink hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
-            >
-              Approve &amp; push
-            </button>
-            <button
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="danger"
+              size="md"
               disabled={busy}
               onClick={() => onVerdict(run.id, "reject")}
-              className="font-mono uppercase tracking-kicker text-[12px] px-6 py-3 border-2 border-accent text-accent hover:bg-accent hover:text-paper transition-colors disabled:opacity-40"
             >
               Reject
-            </button>
-            <span className="font-mono text-[12px] text-ink-faint italic ml-2">
-              the agent is waiting on you.
-            </span>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              disabled={busy}
+              onClick={() => onVerdict(run.id, "approve")}
+            >
+              Approve &amp; push
+            </Button>
           </div>
         ) : (
-          <p className="mt-3 font-display italic text-[18px] text-ink-muted">
-            Verdict on record:{" "}
-            <span className="not-italic font-mono text-ink">
+          <div className="text-right text-sm">
+            <p className="kicker">Verdict</p>
+            <p className="f-mono text-fg mt-1">
               {run.approval_verdict ?? run.status}
-            </span>
-            .
-          </p>
+            </p>
+          </div>
         )}
-      </section>
-    </article>
+      </div>
+
+      {/* ─── Metric cards ─────────────────────────────────────────────── */}
+      <div>
+        <div className="flex items-baseline justify-between mb-2.5">
+          <p className="kicker">Fidelity</p>
+          <p className="text-xs text-fg-faint">4 metrics · 3 gating</p>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <MetricCard
+            label="TSTR · utility"
+            value={run.metrics.TSTR}
+            threshold={`≥ ${THRESHOLDS.TSTR_MIN.toFixed(2)}`}
+            pass={run.metrics.TSTR == null ? null : run.metrics.TSTR >= THRESHOLDS.TSTR_MIN}
+            hint="XGBoost AUC, train synth → test real"
+          />
+          <MetricCard
+            label="KS_avg · numeric"
+            value={run.metrics.KS_avg}
+            threshold={`≤ ${THRESHOLDS.KS_MAX.toFixed(2)}`}
+            pass={run.metrics.KS_avg <= THRESHOLDS.KS_MAX}
+            hint="Kolmogorov–Smirnov, per-col mean"
+          />
+          <MetricCard
+            label="JS_avg · categorical"
+            value={run.metrics.JS_avg}
+            threshold="reported"
+            pass={null}
+            hint="Jensen–Shannon, per-col mean"
+          />
+          <MetricCard
+            label="DCR_min · privacy"
+            value={run.metrics.DCR_min}
+            threshold={`≥ ${THRESHOLDS.DCR_MIN.toFixed(2)}`}
+            pass={run.metrics.DCR_min >= THRESHOLDS.DCR_MIN}
+            hint="closest synth↔real / median real↔real"
+          />
+        </div>
+      </div>
+
+      {/* ─── Distribution comparison ──────────────────────────────────── */}
+      <div>
+        <div className="flex items-baseline justify-between mb-2.5">
+          <p className="kicker">Distribution comparison · top columns</p>
+          <p className="text-xs text-fg-faint">500 real vs 500 synth</p>
+        </div>
+        <DistributionPlots
+          runId={run.id}
+          sourceTable={run.source_table}
+          columns={run.plot_columns?.slice(0, 4) ?? []}
+        />
+      </div>
+    </section>
   );
 }
 
-function SectionLabel({
-  kicker,
-  title,
-}: {
-  kicker: string;
-  title: string | null;
-}) {
-  return (
-    <div>
-      <p className="kicker">{kicker}</p>
-      {title && (
-        <h2 className="font-display text-[28px] leading-none text-ink mt-1.5">
-          {title}
-        </h2>
-      )}
-    </div>
-  );
-}
-
-function DoubleRule() {
-  return (
-    <div aria-hidden>
-      <hr className="rule" />
-      <div style={{ height: 3 }} />
-      <hr className="rule" />
-    </div>
-  );
+function Sep() {
+  return <span aria-hidden className="text-fg-dim">·</span>;
 }

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { fmtRelative, fmtRunId } from "@/lib/format";
+import { fmtRelative, fmtRunId, fmtMetric } from "@/lib/format";
 import type { RunDocClient } from "@/lib/types";
-import { StatusGlyph } from "./StatusGlyph";
+import { StatusDot } from "./StatusDot";
 
 type Props = {
   selectedId: string | null;
@@ -34,74 +34,82 @@ export function RunsList({ selectedId, onSelect, onRunsLoaded }: Props) {
   }, []);
 
   if (loading && runs.length === 0) {
-    return <p className="font-mono text-[12px] text-ink-faint">loading run log…</p>;
+    return <p className="text-sm text-fg-faint">Loading runs…</p>;
   }
   if (runs.length === 0) {
     return (
-      <p className="font-mono text-[12px] text-ink-faint">
-        no runs yet · trigger one with{" "}
-        <code className="text-ink">python agent/orchestrator.py --source loan_applications --target loan_status</code>
-      </p>
+      <div className="border border-dashed border-border px-5 py-8 text-center rounded-md">
+        <p className="text-sm text-fg-muted">No runs yet.</p>
+        <p className="mt-1 text-xs text-fg-faint">
+          Trigger one with{" "}
+          <code className="f-mono text-fg-muted">python agent/orchestrator.py</code>
+        </p>
+      </div>
     );
   }
 
   return (
-    <table className="w-full text-[13px] font-mono tabular">
-      <thead>
-        <tr className="text-ink-muted text-left">
-          <Th className="w-[60px]">No.</Th>
-          <Th className="w-[120px]">When</Th>
-          <Th>Source</Th>
-          <Th className="w-[200px]">Engine · retry</Th>
-          <Th className="w-[140px]">Status</Th>
-        </tr>
-      </thead>
-      <tbody>
-        {runs.map((r, i) => {
-          const isSel = r.id === selectedId;
-          return (
-            <tr
-              key={r.id}
-              onClick={() => onSelect(r.id)}
-              className={`group border-t border-rule-thin cursor-pointer transition-colors ${
-                isSel ? "bg-accent-soft" : "hover:bg-paper-soft"
-              }`}
-            >
-              <Td>
-                <span className="text-ink-faint">№</span>{" "}
-                <span className={isSel ? "text-ink" : "text-ink-muted"}>
-                  {fmtRunId(r.id)}
-                </span>
-              </Td>
-              <Td className="text-ink-muted">{fmtRelative(r.created_at)}</Td>
-              <Td className="text-ink">{r.source_table}</Td>
-              <Td className="text-ink-muted">
-                {r.engine}
-                {r.retry_count > 0 && (
-                  <span className="text-accent"> · retry {r.retry_count}</span>
-                )}
-              </Td>
-              <Td>
-                <StatusGlyph status={r.status} />
-              </Td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="border border-border rounded-md overflow-hidden">
+      <table className="w-full f-sans text-sm">
+        <thead className="bg-bg-elev-1">
+          <tr className="text-left text-fg-faint">
+            <Th>Run</Th>
+            <Th>Source → Destination</Th>
+            <Th>Engine</Th>
+            <Th className="text-right">TSTR</Th>
+            <Th className="text-right">KS</Th>
+            <Th className="text-right">DCR</Th>
+            <Th>Status</Th>
+            <Th className="text-right">When</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {runs.map((r) => {
+            const isSel = r.id === selectedId;
+            return (
+              <tr
+                key={r.id}
+                onClick={() => onSelect(r.id)}
+                className={`group cursor-pointer border-t border-border-soft transition-colors ${
+                  isSel ? "bg-bg-elev-2" : "hover:bg-bg-elev-1"
+                }`}
+              >
+                <Td>
+                  <span className="f-mono text-xs text-fg">{fmtRunId(r.id)}</span>
+                  {r.retry_count > 0 && (
+                    <span className="ml-1.5 f-mono text-2xs text-warn">↻{r.retry_count}</span>
+                  )}
+                </Td>
+                <Td>
+                  <span className="text-fg">{r.source_table}</span>
+                  <span className="text-fg-dim mx-1.5">→</span>
+                  <span className="text-fg-muted">{r.destination_table}</span>
+                </Td>
+                <Td className="f-mono text-xs text-fg-muted">{r.engine}</Td>
+                <Td className="text-right f-mono tab text-fg">{fmtMetric(r.metrics?.TSTR ?? null)}</Td>
+                <Td className="text-right f-mono tab text-fg">{fmtMetric(r.metrics?.KS_avg ?? null)}</Td>
+                <Td className="text-right f-mono tab text-fg">{fmtMetric(r.metrics?.DCR_min ?? null)}</Td>
+                <Td>
+                  <StatusDot status={r.status} />
+                </Td>
+                <Td className="text-right text-fg-faint">{fmtRelative(r.created_at)}</Td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <th
-      className={`py-2 px-3 font-mono font-normal text-[11px] uppercase tracking-kicker ${className}`}
-    >
+    <th className={`px-3 py-2 f-mono text-2xs uppercase tracking-wider font-medium ${className}`}>
       {children}
     </th>
   );
 }
 
 function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`py-2.5 px-3 ${className}`}>{children}</td>;
+  return <td className={`px-3 py-2.5 ${className}`}>{children}</td>;
 }

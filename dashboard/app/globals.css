@@ -2,73 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design tokens ───────────────────────────────────────────────────────
-   Editorial / scientific-journal aesthetic — warm newsprint paper, ink
-   typography, hairline rules between sections, one vermillion accent.
-   No dark theme. No shadcn rounded shadows. No purple gradients.
+/* ─── Tokens ───────────────────────────────────────────────────────────────
+   B2B infrastructure dashboard — dark, dense, calm. Reference points:
+   Linear, Vercel, Tailscale, Honeycomb. No serif. No purple. No glass.
+   ONE accent (mint) used only for semantic "validated / passing" and
+   primary actions. Everything else is a refined grayscale.
 */
 :root {
-  --paper:        #faf8f3;   /* warm newsprint background */
-  --paper-soft:   #f3f1e9;   /* hover / sunken surface */
-  --paper-fold:   #ede9dd;   /* further depth */
-  --surface:      #ffffff;   /* lifted card surface (rare) */
-  --rule:         #d8d4c5;   /* printer's-rule hairline */
-  --rule-thin:    #e9e6da;   /* fainter division */
-  --ink:          #0c0c0c;   /* primary text */
-  --ink-muted:    #6b675a;   /* secondary text */
-  --ink-faint:    #a39e8f;   /* tertiary, captions */
-  --accent:       #c1272d;   /* vermillion — the ONE accent */
-  --accent-soft:  #f6e0e1;   /* accent wash for backgrounds */
-  --green:        #2c6a3e;   /* "approved" ink-green */
-  --amber:        #a86c00;   /* "awaiting" ink-amber */
+  /* Background layers — subtle warm undertone to avoid the dead-blue
+     feeling of pure #000. */
+  --bg:           #0a0a0b;
+  --bg-elev-1:    #111113;   /* sidebar, hover */
+  --bg-elev-2:    #16161a;   /* cards, selected row */
+  --bg-elev-3:    #1d1d22;
+
+  /* Borders — strictly hairline */
+  --border:       #25252b;
+  --border-soft:  #1c1c20;
+
+  /* Text */
+  --fg:           #e8e8e6;
+  --fg-muted:     #a0a09a;
+  --fg-faint:     #6a6a64;
+  --fg-dim:       #4a4a46;
+
+  /* Brand accent — Tailwind mint-400 */
+  --accent:       #34d399;
+  --accent-soft:  rgba(52, 211, 153, 0.14);
+
+  /* Semantic */
+  --ok:           #34d399;
+  --warn:         #f5a524;
+  --danger:       #f15852;
+  --info:         #6b8eff;
 }
 
+* { box-sizing: border-box; }
+
 html, body {
-  background: var(--paper);
-  color: var(--ink);
-  font-feature-settings: "kern", "liga", "calt", "ss01";
+  background: var(--bg);
+  color: var(--fg);
+  font-feature-settings: "kern", "liga", "calt", "cv11", "ss01", "ss03";
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
 }
 
-/* Subtle paper grain via SVG noise — gives the off-white background
-   life so it doesn't look like a missing background-color bug. */
-body {
-  background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.05 0 0 0 0 0.05 0 0 0 0 0.05 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 240px 240px;
-  background-repeat: repeat;
-}
+/* Font helpers — all sans-serif, never serif. */
+.f-sans { font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Inter", sans-serif; }
+.f-mono { font-family: var(--font-geist-mono), ui-monospace, monospace; }
 
-/* Typography defaults */
-.font-display { font-family: var(--font-fraunces), Georgia, serif; }
-.font-body    { font-family: var(--font-geist-sans), system-ui, sans-serif; }
-.font-mono    { font-family: var(--font-geist-mono), ui-monospace, monospace; }
+/* Tabular figures everywhere numeric */
+.tab { font-variant-numeric: tabular-nums; }
 
-/* Tabular figures for metric columns — decimal alignment without struggle */
-.tabular { font-variant-numeric: tabular-nums; }
-
-/* Section kicker — small-caps label above headings */
+/* Section kicker — small uppercase mono label */
 .kicker {
   font-family: var(--font-geist-mono), monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: var(--fg-faint);
+  font-weight: 500;
 }
 
-/* Printer's rule — hairline divider */
-.rule {
+/* Hairline divider used between sections */
+.hr {
   height: 1px;
-  background: var(--rule);
+  background: var(--border);
   border: 0;
 }
 
-::selection { background: var(--accent); color: var(--paper); }
+::selection { background: var(--accent); color: var(--bg); }
 
-/* Sharp focus ring */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 1.5px solid var(--accent);
   outline-offset: 2px;
+  border-radius: 2px;
 }
+
+/* Scrollbar — subtle, only on dark */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 5px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-track { background: var(--bg); }
+
+/* Pulse animation for the live agent activity dot */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+.pulse { animation: pulse-soft 1.6s ease-in-out infinite; }
