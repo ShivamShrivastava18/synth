@@ -27,8 +27,8 @@ gcloud run deploy "$SERVICE" \
   --memory 2Gi \
   --cpu 2 \
   --timeout 300 \
-  --min-instances 0 \
-  --max-instances 3 \
+  --min-instances 1 \
+  --max-instances 1 \
   --add-cloudsql-instances "${PROJECT_ID}:${REGION}:synth-prod,${PROJECT_ID}:${REGION}:synth-staging" \
   --set-env-vars "PROD_DB_DSN=${PROD_DSN},STAGING_DB_DSN=${STAGING_DSN}"
 

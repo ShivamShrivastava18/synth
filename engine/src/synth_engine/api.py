@@ -37,6 +37,12 @@ class PushReq(BaseModel):
     destination_table: str
 
 
+class UploadGcsReq(BaseModel):
+    run_id: str
+    destination_table: str  # e.g. "loan_applications"
+    bucket: str = "synth-staging-data"
+
+
 _SYNTH_CACHE: dict[str, pd.DataFrame] = {}
 
 
@@ -129,6 +135,35 @@ def push_endpoint(req: PushReq):
         raise HTTPException(status_code=503, detail=f"DB unavailable: {exc}") from exc
 
     return {"pushed": pushed}
+
+
+@app.post("/upload_gcs")
+def upload_gcs_endpoint(req: UploadGcsReq):
+    synth_df = _SYNTH_CACHE.get(req.run_id)
+    if synth_df is None:
+        raise HTTPException(status_code=404, detail=f"run_id {req.run_id!r} not found in cache")
+
+    import io
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from google.cloud import storage as gcs
+
+    # Serialize DataFrame to parquet in memory
+    table = pa.Table.from_pandas(synth_df, preserve_index=False)
+    buf = io.BytesIO()
+    pq.write_table(table, buf)
+    buf.seek(0)
+    parquet_bytes = buf.getvalue()
+
+    # Upload to GCS
+    blob_name = f"{req.destination_table}/{req.run_id}.parquet"
+    uri = f"gs://{req.bucket}/{blob_name}"
+    client = gcs.Client()
+    bucket = client.bucket(req.bucket)
+    blob = bucket.blob(blob_name)
+    blob.upload_from_string(parquet_bytes, content_type="application/octet-stream")
+
+    return {"uri": uri, "rows": len(synth_df), "bytes": len(parquet_bytes)}
 
 
 @app.get("/runs/{run_id}/plot_sample")

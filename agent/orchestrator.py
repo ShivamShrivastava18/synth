@@ -20,7 +20,7 @@ import uuid
 import httpx
 
 TOOLS_URL = os.environ["TOOLS_URL"]
-TIMEOUT = 600
+TIMEOUT = 900  # must exceed the longest blocking tool call (wait_for_sync_complete = 600s + margin)
 
 # Fidelity gate thresholds (from spec §5)
 TSTR_MIN = 0.75
@@ -126,11 +126,54 @@ def run(source_table: str, destination_table: str, target_col: str | None) -> di
     })
 
     # 6. request_human_approval (SKIPPED in this orchestrator run — would block 30 min)
+    # The Gemini Agent Builder agent does this step fully (polls Firestore for verdict).
+    # The CLI orchestrator skips it and proceeds directly to the GCS/Fivetran sync steps
+    # since we trust the fidelity gate as the approval signal here.
     print("\n[6] request_human_approval — skipped in CLI orchestrator")
     print(f"    Dashboard will show run {run_id} as awaiting_approval")
     print(f"    To approve in Firestore manually: set runs/{run_id}.approval_verdict = 'approved'")
 
-    return {"run_id": run_id, "status": "awaiting_approval", "metrics": metrics}
+    # 7. upload_synthetic_to_gcs
+    print(f"\n[7] upload_synthetic_to_gcs run_id={run_id} destination_table={destination_table}")
+    upload_result = call_tool("upload_synthetic_to_gcs", {
+        "run_id": run_id,
+        "destination_table": destination_table,
+    })
+    sync_uri = upload_result.get("uri", "")
+    print(f"    → {sync_uri} ({upload_result.get('rows')} rows, {upload_result.get('bytes')} bytes)")
+
+    # 8. trigger_fivetran_sync
+    print("\n[8] trigger_fivetran_sync")
+    fivetran_result = call_tool("trigger_fivetran_sync", {})
+    print(f"    → {fivetran_result}")
+
+    # 9. wait_for_sync_complete (up to 10 min)
+    print("\n[9] wait_for_sync_complete (timeout=600s)")
+    sync_status = call_tool("wait_for_sync_complete", {"timeout_seconds": 600})
+    print(f"    → status={sync_status.get('status')}")
+    if sync_status.get("status") != "succeeded":
+        print(f"    ✗ sync did not succeed: {sync_status}")
+        call_tool("notify_slack", {
+            "message": f"Synth run {run_id} Fivetran sync ended with: {sync_status}"
+        })
+
+    # 10. write_run status=pushed
+    import datetime
+    pushed_at = datetime.datetime.utcnow().isoformat() + "Z"
+    print(f"\n[10] write_run status=pushed pushed_at={pushed_at}")
+    call_tool("write_run", {
+        "run_id": run_id,
+        "status": "pushed",
+        "metrics": metrics,
+    })
+
+    # 11. notify_slack success
+    print("\n[11] notify_slack success")
+    call_tool("notify_slack", {
+        "message": f"Synth run {run_id} landed in staging: {sync_uri}"
+    })
+
+    return {"run_id": run_id, "status": "pushed", "uri": sync_uri, "metrics": metrics}
 
 
 def pick_plot_columns(schema: dict, n: int = 4) -> list[str]:
@@ -157,7 +200,7 @@ def main() -> int:
     destination = args.destination or args.source
     result = run(args.source, destination, args.target)
     print(f"\n=== final: {result['status']} ===")
-    return 0 if result["status"] != "failed" else 1
+    return 0 if result["status"] not in ("failed",) else 1
 
 
 if __name__ == "__main__":

@@ -16,6 +16,9 @@ fi
 if [[ -n "${FIVETRAN_API_KEY:-}" && -n "${FIVETRAN_API_SECRET:-}" ]]; then
   ENV_VARS="${ENV_VARS},FIVETRAN_API_KEY=${FIVETRAN_API_KEY},FIVETRAN_API_SECRET=${FIVETRAN_API_SECRET}"
 fi
+if [[ -n "${FIVETRAN_CONNECTION_ID:-}" ]]; then
+  ENV_VARS="${ENV_VARS},FIVETRAN_CONNECTION_ID=${FIVETRAN_CONNECTION_ID}"
+fi
 
 gcloud run deploy "$SERVICE" \
   --source agent/ \
