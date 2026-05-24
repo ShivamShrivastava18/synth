@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ───────────────────────────────────────────────────────
+   Editorial / scientific-journal aesthetic — warm newsprint paper, ink
+   typography, hairline rules between sections, one vermillion accent.
+   No dark theme. No shadcn rounded shadows. No purple gradients.
+*/
+:root {
+  --paper:        #faf8f3;   /* warm newsprint background */
+  --paper-soft:   #f3f1e9;   /* hover / sunken surface */
+  --paper-fold:   #ede9dd;   /* further depth */
+  --surface:      #ffffff;   /* lifted card surface (rare) */
+  --rule:         #d8d4c5;   /* printer's-rule hairline */
+  --rule-thin:    #e9e6da;   /* fainter division */
+  --ink:          #0c0c0c;   /* primary text */
+  --ink-muted:    #6b675a;   /* secondary text */
+  --ink-faint:    #a39e8f;   /* tertiary, captions */
+  --accent:       #c1272d;   /* vermillion — the ONE accent */
+  --accent-soft:  #f6e0e1;   /* accent wash for backgrounds */
+  --green:        #2c6a3e;   /* "approved" ink-green */
+  --amber:        #a86c00;   /* "awaiting" ink-amber */
+}
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-feature-settings: "kern", "liga", "calt", "ss01";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle paper grain via SVG noise — gives the off-white background
+   life so it doesn't look like a missing background-color bug. */
+body {
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.05 0 0 0 0 0.05 0 0 0 0 0.05 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  background-repeat: repeat;
+}
+
+/* Typography defaults */
+.font-display { font-family: var(--font-fraunces), Georgia, serif; }
+.font-body    { font-family: var(--font-geist-sans), system-ui, sans-serif; }
+.font-mono    { font-family: var(--font-geist-mono), ui-monospace, monospace; }
+
+/* Tabular figures for metric columns — decimal alignment without struggle */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Section kicker — small-caps label above headings */
+.kicker {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Printer's rule — hairline divider */
+.rule {
+  height: 1px;
+  background: var(--rule);
+  border: 0;
+}
+
+::selection { background: var(--accent); color: var(--paper); }
+
+/* Sharp focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
