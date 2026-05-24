@@ -35,6 +35,26 @@
   --warn:         #f5a524;
   --danger:       #f15852;
   --info:         #6b8eff;
+
+  /* Subtle washes — only ever used at 6-14% opacity for row tints
+     and engine badges. Never used as primary surfaces. */
+  --wash-mint:    rgba(52, 211, 153, 0.10);
+  --wash-amber:   rgba(245, 165, 36, 0.09);
+  --wash-rose:    rgba(241, 88, 82, 0.09);
+  --wash-violet:  rgba(139, 124, 246, 0.10);
+  --wash-teal:    rgba(94, 196, 196, 0.10);
+  --wash-blue:    rgba(107, 142, 255, 0.08);
+
+  /* Tinted text for engine / connection labels — subtle, never loud */
+  --tint-violet:  #b9aeff;   /* gaussian copula */
+  --tint-teal:    #7fd6c7;   /* conditional histogram */
+  --tint-pgblue:  #6b9fe0;   /* Postgres */
+  --tint-fsorange:#f59f5b;   /* Firestore */
+  --tint-ftteal:  #5ec4c4;   /* Fivetran */
+
+  /* Motion */
+  --ease-out:     cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 * { box-sizing: border-box; }
@@ -86,9 +106,62 @@ html, body {
 ::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 5px; border: 2px solid var(--bg); }
 ::-webkit-scrollbar-track { background: var(--bg); }
 
-/* Pulse animation for the live agent activity dot */
+/* ─── Motion ────────────────────────────────────────────────────────────── */
+
+/* Status dot expanding ring — solid dot stays, outer ring grows and fades */
+@keyframes ring-pulse {
+  0%   { transform: scale(0.9); opacity: 0.55; }
+  80%  { transform: scale(2.4); opacity: 0;    }
+  100% { transform: scale(2.4); opacity: 0;    }
+}
+.ring-pulse {
+  animation: ring-pulse 1.8s var(--ease-out) infinite;
+}
+
+/* Dot pulse — gentle scale for sidebar agent activity */
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%      { opacity: 0.55; transform: scale(0.85); }
 }
 .pulse { animation: pulse-soft 1.6s ease-in-out infinite; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elev-1) 25%,
+    var(--bg-elev-2) 50%,
+    var(--bg-elev-1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s var(--ease-in-out) infinite;
+}
+
+/* Sparkline draw — used inline via style stroke-dashoffset */
+@keyframes draw-line {
+  to { stroke-dashoffset: 0; }
+}
+.draw {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: draw-line 900ms var(--ease-out) forwards;
+}
+
+/* Standard hover transitions */
+.transition-fast { transition: all 120ms var(--ease-out); }
+.transition-base { transition: all 180ms var(--ease-out); }
+
+/* Subtle lift on hover for interactive cards */
+.lift {
+  transition: border-color 180ms var(--ease-out),
+              background-color 180ms var(--ease-out),
+              transform 180ms var(--ease-out);
+}
+.lift:hover {
+  border-color: var(--fg-dim);
+  background: var(--bg-elev-2);
+}
