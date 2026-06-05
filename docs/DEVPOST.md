@@ -79,7 +79,40 @@ Three Cloud Run services + the Fivetran-managed pipeline + the Gemini agent itse
 
 ## Built with
 
-`Google Cloud Agent Builder` · `Gemini 3.1 Pro Preview` · `Vertex AI` · `Fivetran MCP` · `Fivetran` · `Cloud Run` · `Cloud SQL (Postgres)` · `BigQuery` · `Google Cloud Storage` · `Firestore` · `Cloud Build` · `Artifact Registry` · `Cloud Scheduler` · `Next.js 14` · `React` · `TypeScript` · `Tailwind CSS` · `Geist (font)` · `Plotly.js` · `FastAPI` · `Python` · `pandas` · `numpy` · `scipy` · `scikit-learn` · `XGBoost` · `pyarrow` · `Pydantic` · `Lending Club (Kaggle)`
+Type each on its own line in the Devpost form (no backticks, no spaces — the form rejects those). The first ~12 are the ones judges see in the project header, so they're ordered by relevance:
+
+```
+google-cloud
+agent-builder
+gemini
+vertex-ai
+fivetran
+mcp
+cloud-run
+bigquery
+google-cloud-storage
+firestore
+cloud-sql
+postgresql
+nextjs
+react
+typescript
+tailwindcss
+geist
+plotly
+fastapi
+python
+pandas
+numpy
+scipy
+scikit-learn
+xgboost
+pyarrow
+pydantic
+cloud-build
+cloud-scheduler
+lending-club
+```
 
 ## Try it out
 
