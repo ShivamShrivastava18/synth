@@ -1,18 +1,7 @@
 /**
- * Records a fully-scripted walkthrough of the deployed Synth dashboard.
- * Target ~115 seconds so the TTS narration is covered by live visuals.
- *
- * Scenes:
- *   A. Linger on runs table (sparklines + status pulses)          ~ 7 s
- *   B. Select first run → detail panel                            ~ 4 s
- *   C. Slow scroll through metric cards (zoom on each)            ~ 22 s
- *   D. Slow scroll through histograms                             ~ 20 s
- *   E. Scroll to verdict region                                   ~ 6 s
- *   F. Scroll back to top + click second run for variety          ~ 12 s
- *   G. Scroll through that run's detail                           ~ 14 s
- *   H. Back to top, click "New run" → row appears                 ~ 18 s
- *   I. Hover and linger on the new pulsing row                    ~ 12 s
- *                                                                 ~115 s
+ * Records a scripted walkthrough of the deployed dashboard.
+ * Target ~55 seconds — the rest of the video is covered by separate
+ * scene HTMLs (architecture, terminal, Fivetran, BigQuery, end card).
  */
 import { chromium } from "playwright";
 import fs from "node:fs";
@@ -21,7 +10,7 @@ import path from "node:path";
 const URL = process.env.DASH_URL || "https://synth-dashboard-983648391385.us-central1.run.app/";
 const OUT_DIR = path.resolve("./recordings");
 
-async function smoothScroll(page, toY, durationMs = 1500) {
+async function smoothScroll(page, toY, durationMs = 1300) {
   await page.evaluate(async ({ toY, durationMs }) => {
     const fromY = window.scrollY;
     const start = performance.now();
@@ -39,14 +28,18 @@ async function smoothScroll(page, toY, durationMs = 1500) {
 }
 
 async function main() {
-  fs.rmSync(OUT_DIR, { recursive: true, force: true });
   fs.mkdirSync(OUT_DIR, { recursive: true });
+  const TMP_DIR = path.join(OUT_DIR, "_dashboard_tmp");
+  fs.rmSync(TMP_DIR, { recursive: true, force: true });
+  fs.mkdirSync(TMP_DIR, { recursive: true });
+  const finalPath = path.join(OUT_DIR, "dashboard.webm");
+  if (fs.existsSync(finalPath)) fs.unlinkSync(finalPath);
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
     deviceScaleFactor: 1,
-    recordVideo: { dir: OUT_DIR, size: { width: 1920, height: 1080 } },
+    recordVideo: { dir: TMP_DIR, size: { width: 1920, height: 1080 } },
   });
   const page = await context.newPage();
 
@@ -54,82 +47,54 @@ async function main() {
   await page.goto(URL, { waitUntil: "networkidle" });
   await page.waitForSelector("table tbody tr", { timeout: 15000 });
 
-  // ─── A. Linger on runs table ───────────────────────────────────────────
-  await page.waitForTimeout(7000);
-
-  // ─── B. Select first run ───────────────────────────────────────────────
-  console.log("→ select first run");
-  await page.locator("table tbody tr").first().click();
+  // Linger on runs table (4s)
   await page.waitForTimeout(4000);
 
-  // ─── C. Scroll through metrics ─────────────────────────────────────────
-  console.log("→ scroll: metric cards");
-  await smoothScroll(page, 380, 1800);
-  await page.waitForTimeout(6500);
-  await smoothScroll(page, 500, 1100);
-  await page.waitForTimeout(6000);
-  await smoothScroll(page, 600, 1100);
-  await page.waitForTimeout(5500);
+  // Select first run (2s + open)
+  console.log("→ select first run");
+  await page.locator("table tbody tr").first().click();
+  await page.waitForTimeout(2500);
 
-  // ─── D. Histograms ────────────────────────────────────────────────────
-  console.log("→ scroll: histograms");
-  await smoothScroll(page, 820, 1400);
-  await page.waitForTimeout(5500);
-  await smoothScroll(page, 980, 1100);
-  await page.waitForTimeout(5500);
-  await smoothScroll(page, 1100, 1100);
-  await page.waitForTimeout(5000);
+  // Scroll to metric cards (10s linger)
+  console.log("→ scroll to metrics");
+  await smoothScroll(page, 380, 1200);
+  await page.waitForTimeout(9000);
 
-  // ─── E. Verdict area ───────────────────────────────────────────────────
-  console.log("→ scroll: verdict");
-  await smoothScroll(page, 1300, 900);
-  await page.waitForTimeout(4500);
-
-  // ─── F. Back to top, click second run ─────────────────────────────────
-  console.log("→ scroll top, pick another run");
-  await smoothScroll(page, 0, 1200);
-  await page.waitForTimeout(3000);
-  const rows = page.locator("table tbody tr");
-  if ((await rows.count()) > 1) {
-    await rows.nth(1).click();
-    await page.waitForTimeout(3500);
-  } else {
-    await rows.first().click();
-    await page.waitForTimeout(3500);
-  }
-
-  // ─── G. Scroll through that detail ────────────────────────────────────
-  console.log("→ scroll: second run detail");
-  await smoothScroll(page, 420, 1300);
-  await page.waitForTimeout(5500);
+  // Scroll to histograms (10s linger)
+  console.log("→ scroll to histograms");
   await smoothScroll(page, 820, 1300);
-  await page.waitForTimeout(6500);
+  await page.waitForTimeout(9000);
 
-  // ─── H. Back to top, click "New run" ──────────────────────────────────
+  // Quick peek at verdict (2s)
+  console.log("→ scroll to verdict");
+  await smoothScroll(page, 1200, 900);
+  await page.waitForTimeout(2200);
+
+  // Back to top, click New run (10s wait so the row appears)
   console.log("→ scroll top, click New run");
   await smoothScroll(page, 0, 1100);
-  await page.waitForTimeout(2200);
+  await page.waitForTimeout(1800);
   const trigger = page.locator('button:has-text("New run")').first();
   await trigger.scrollIntoViewIfNeeded();
   await trigger.click();
-  await page.waitForTimeout(15000);
+  await page.waitForTimeout(10000);
 
-  // ─── I. Hover on new row, linger ──────────────────────────────────────
+  // Hover the new row briefly
   console.log("→ hover new row");
   await page.locator("table tbody tr").first().hover();
-  await page.waitForTimeout(11000);
+  await page.waitForTimeout(3500);
 
   await context.close();
   await browser.close();
 
-  const file = fs.readdirSync(OUT_DIR).find((f) => f.endsWith(".webm"));
+  const file = fs.readdirSync(TMP_DIR).find((f) => f.endsWith(".webm"));
   if (!file) {
     console.error("no .webm produced");
     process.exit(1);
   }
-  const final = path.join(OUT_DIR, "dashboard.webm");
-  fs.renameSync(path.join(OUT_DIR, file), final);
-  console.log("✓ wrote", final);
+  fs.renameSync(path.join(TMP_DIR, file), finalPath);
+  fs.rmdirSync(TMP_DIR);
+  console.log("✓ wrote", finalPath);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

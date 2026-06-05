@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Agent log</title>
+<style>
+  :root {
+    --bg:#0a0a0b; --fg:#e8e8e6; --muted:#a0a09a; --faint:#6a6a64;
+    --accent:#34d399; --warn:#f5a524; --info:#6b8eff; --border:#25252b;
+    --surface:#16161a;
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: "SF Mono", ui-monospace, monospace;
+    width: 1920px; height: 1080px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .terminal {
+    width: 1500px; height: 800px; background: #08080a;
+    border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.4);
+  }
+  .titlebar {
+    height: 38px; background: #15151a; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 8px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #f15852; } .dot.y { background: #f5a524; } .dot.g { background: #34d399; }
+  .label { margin-left: 16px; color: var(--faint); font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  .body { padding: 28px 32px; font-size: 19px; line-height: 1.7; }
+  .row { opacity: 0; transform: translateY(4px);
+    animation: appear 350ms cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .row .pfx { color: var(--faint); margin-right: 12px; }
+  .row .arrow { color: var(--accent); }
+  .row .ok { color: var(--accent); }
+  .row .warn { color: var(--warn); }
+  .row .info { color: var(--info); }
+  .row .key { color: var(--muted); }
+  .row .v { color: var(--fg); }
+  .blink { display: inline-block; width: 10px; height: 18px;
+    background: var(--accent); margin-left: 4px; vertical-align: middle;
+    animation: blink 1s steps(2) infinite;
+  }
+  /* per-row reveal timing */
+  .row.r0  { animation-delay: 0.4s; }
+  .row.r1  { animation-delay: 1.4s; }
+  .row.r2  { animation-delay: 2.3s; }
+  .row.r3  { animation-delay: 3.2s; }
+  .row.r4  { animation-delay: 4.2s; }
+  .row.r5  { animation-delay: 5.2s; }
+  .row.r6  { animation-delay: 6.2s; }
+  .row.r7  { animation-delay: 7.5s; }
+  .row.r8  { animation-delay: 8.8s; }
+  .row.r9  { animation-delay: 10.2s; }
+  .row.r10 { animation-delay: 11.6s; }
+  .row.r11 { animation-delay: 12.6s; }
+
+  @keyframes appear { to { opacity: 1; transform: translateY(0); } }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="titlebar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="label">agent &middot; gemini-3.1-pro-preview</span>
+    </div>
+    <div class="body">
+      <div class="row r0"><span class="pfx">$</span><span class="v">python agent/gemini_agent.py --source loan_applications --target loan_status</span></div>
+      <div class="row r1"><span class="arrow">→</span> <span class="v">discover_schema</span><span class="key"> source_table=loan_applications</span></div>
+      <div class="row r2"><span class="pfx">  ←</span> <span class="key">{</span> <span class="v">columns: 89</span> <span class="key">}</span></div>
+      <div class="row r3"><span class="arrow">→</span> <span class="v">generate_synthetic</span><span class="key"> engine=gaussian_copula n=5000</span></div>
+      <div class="row r4"><span class="pfx">  ←</span> <span class="key">{</span> <span class="v">rows: 5000</span><span class="key">,</span> <span class="v">columns: 89</span> <span class="key">}</span></div>
+      <div class="row r5"><span class="arrow">→</span> <span class="v">validate_fidelity</span><span class="key"> run_id=…2ee3 target_col=loan_status</span></div>
+      <div class="row r6"><span class="pfx">  ←</span> <span class="ok">TSTR=0.97</span> <span class="ok">KS=0.03</span> <span class="ok">DCR=0.52</span> <span class="ok">✓ gate passed</span></div>
+      <div class="row r7"><span class="arrow">→</span> <span class="v">request_human_approval</span><span class="key"> timeout=1800s</span></div>
+      <div class="row r8"><span class="pfx">  ←</span> <span class="info">verdict: approved</span></div>
+      <div class="row r9"><span class="arrow">→</span> <span class="v">upload_synthetic_to_gcs</span> <span class="key">→</span> <span class="v">gs://synth-staging-data/loan_applications/…2ee3.parquet</span></div>
+      <div class="row r10"><span class="arrow">→</span> <span class="v">trigger_fivetran_sync</span> <span class="key">connection=bar_oat</span> <span class="ok">→ success</span></div>
+      <div class="row r11"><span class="arrow">→</span> <span class="v">wait_for_sync_complete</span> <span class="ok">→ succeeded</span> <span class="key">in 38s</span> <span class="blink"></span></div>
+    </div>
+  </div>
+</body>
+</html>

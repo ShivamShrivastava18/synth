@@ -96,7 +96,7 @@ export function Sidebar() {
         <ul className="mt-2 space-y-1.5 text-sm">
           <ConnectionRow icon="postgres"  label="Postgres"   tone="ok"   note="prod + staging" />
           <ConnectionRow icon="firestore" label="Firestore"  tone="ok"   note="us-central1"    />
-          <ConnectionRow icon="fivetran"  label="Fivetran"   tone="warn" note="needs setup"    />
+          <ConnectionRow icon="fivetran"  label="Fivetran"   tone="ok"   note="bar_oat · GCS→BQ" />
         </ul>
       </div>
 

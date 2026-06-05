@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BigQuery — staging</title>
+<style>
+  :root {
+    --bg:#0a0a0b; --fg:#e8e8e6; --muted:#a0a09a; --faint:#6a6a64;
+    --accent:#34d399; --border:#25252b; --surface:#16161a; --bq:#6b9fe0;
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    width: 1920px; height: 1080px; overflow: hidden; }
+  .stage { width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 50px; padding: 80px; box-sizing: border-box; }
+  .kicker {
+    font-family: "SF Mono", ui-monospace, monospace; font-size: 13px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint);
+    opacity: 0; animation: rise 600ms ease 200ms forwards;
+  }
+  h1 { font-size: 46px; font-weight: 700; letter-spacing: -0.03em; margin: 4px 0 0;
+    opacity: 0; animation: rise 600ms ease 400ms forwards; }
+  .editor {
+    width: 1400px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; opacity: 0;
+    animation: rise 600ms ease 800ms forwards;
+  }
+  .tabbar { display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    background: #0f0f12; }
+  .tab { padding: 12px 24px; font-size: 13px; color: var(--muted);
+    border-right: 1px solid var(--border); }
+  .tab.active { color: var(--fg); background: var(--surface);
+    box-shadow: inset 0 2px 0 var(--bq); }
+  .qarea { padding: 24px 28px; font-family: "SF Mono", ui-monospace, monospace;
+    font-size: 22px; line-height: 1.6; }
+  .qarea .kw { color: var(--bq); }
+  .qarea .fn { color: var(--accent); }
+  .qarea .str { color: var(--muted); }
+  .actions { display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 28px; border-top: 1px solid var(--border); background: #0f0f12; }
+  .run { background: var(--bq); color: #0a0a0b; padding: 8px 22px; border-radius: 6px;
+    font-size: 14px; font-weight: 600; }
+  .meta-line { font-family: "SF Mono", ui-monospace, monospace; font-size: 12px;
+    color: var(--faint); }
+
+  .results {
+    width: 1400px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 32px; opacity: 0;
+    animation: rise 600ms ease 4.0s forwards;
+  }
+  .res-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .res-head .lbl {
+    font-family: "SF Mono", ui-monospace, monospace; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint);
+  }
+  .res-head .time { color: var(--muted); font-size: 13px;
+    font-family: "SF Mono", ui-monospace, monospace; }
+  .big {
+    font-size: 110px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1;
+    margin-top: 16px; color: var(--fg);
+    opacity: 0; animation: count 800ms ease 4.5s forwards;
+    font-variant-numeric: tabular-nums;
+  }
+  .big .unit { color: var(--muted); font-size: 28px; font-weight: 400; margin-left: 18px; }
+  .delta { display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 8px; color: var(--accent); font-size: 14px;
+    font-family: "SF Mono", ui-monospace, monospace; opacity: 0;
+    animation: rise 600ms ease 5.0s forwards;
+  }
+  .delta .arrow { font-size: 18px; }
+
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  @keyframes count { to { opacity: 1; transform: scale(1); }
+                     from { opacity: 0; transform: scale(0.92); } }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div style="text-align:center;">
+      <div class="kicker">BigQuery &middot; synth_staging</div>
+      <h1>Real synthetic rows land in your warehouse</h1>
+    </div>
+
+    <div class="editor">
+      <div class="tabbar">
+        <div class="tab active">untitled_query.sql</div>
+      </div>
+      <div class="qarea">
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> rows<br />
+<span class="kw">FROM</span> <span class="str">`synth-hackathon-2026.synth_staging.loan_applications`</span><span class="kw">;</span>
+      </div>
+      <div class="actions">
+        <span class="run">▶ Run</span>
+        <span class="meta-line">us-central1 &middot; on-demand &middot; ~0.4 MB processed</span>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="res-head">
+        <span class="lbl">Result</span>
+        <span class="time">1.2 s &middot; 1 row</span>
+      </div>
+      <div class="big" id="big">25,000<span class="unit">synthetic rows in staging</span></div>
+      <div class="delta"><span class="arrow">▲</span> 5,000 added by this run</div>
+    </div>
+  </div>
+</body>
+</html>

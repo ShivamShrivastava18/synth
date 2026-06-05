@@ -32,7 +32,7 @@ Copying production data into staging is illegal in half the world.
 Most teams ship with broken fake data and find bugs at <say-as interpret-as="characters">3</say-as> a m.
 <break time="900ms"/>
 
-This is Synth — an autonomous agent built on Google Cloud Agent Builder and <sub alias="JEMineye">Gemini</sub> three point one Pro, with the Fivetran M C P.
+This is Synth — an autonomous agent built on Google Cloud Agent Builder and <phoneme alphabet="ipa" ph="ˈdʒɛmənaɪ">Gemini</phoneme> three point one Pro, with the Fivetran M C P.
 <break time="500ms"/>
 It generates fidelity-validated synthetic data and ships it to staging — on its own.
 <break time="900ms"/>
@@ -41,7 +41,7 @@ I point it at our production Lending Club table — one hundred thousand real lo
 <break time="500ms"/>
 The dashboard's New Run button calls the agent.
 <break time="400ms"/>
-<sub alias="JEMineye">Gemini</sub> reads the schema. Generates five thousand synthetic rows using a Gaussian Copula. Validates fidelity.
+<phoneme alphabet="ipa" ph="ˈdʒɛmənaɪ">Gemini</phoneme> reads the schema. Generates five thousand synthetic rows using a Gaussian Copula. Validates fidelity.
 <break time="900ms"/>
 
 Four metrics.
@@ -71,7 +71,7 @@ Set it on a schedule. Every staging environment. Every night.
 No prod copies. No legal review. No <say-as interpret-as="characters">3</say-as> a m bugs.
 <break time="900ms"/>
 
-Built in fourteen days, on Google Cloud Agent Builder, <sub alias="JEMineye">Gemini</sub> three point one Pro, and the Fivetran M C P.
+Powered by Google Cloud Agent Builder, <phoneme alphabet="ipa" ph="ˈdʒɛmənaɪ">Gemini</phoneme> three point one Pro, and the Fivetran M C P.
 <break time="400ms"/>
 This is Synth.
 </speak>

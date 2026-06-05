@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Fivetran sync</title>
+<style>
+  :root {
+    --bg:#0a0a0b; --fg:#e8e8e6; --muted:#a0a09a; --faint:#6a6a64;
+    --accent:#34d399; --border:#25252b; --surface:#16161a;
+    --ft:#5ec4c4; --gcs:#f59f5b; --bq:#6b9fe0;
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    width: 1920px; height: 1080px; overflow: hidden; }
+  .stage { width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 60px; padding: 80px; box-sizing: border-box; }
+  .kicker {
+    font-family: "SF Mono", ui-monospace, monospace; font-size: 13px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint);
+    opacity: 0; animation: rise 600ms ease 200ms forwards;
+  }
+  h1 { font-size: 46px; font-weight: 700; letter-spacing: -0.03em; margin: 4px 0 0;
+    opacity: 0; animation: rise 600ms ease 400ms forwards;
+  }
+  .card { width: 1400px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 40px 50px; opacity: 0;
+    animation: rise 600ms ease 800ms forwards;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; }
+  .conn { font-family: "SF Mono", ui-monospace, monospace; font-size: 14px;
+    color: var(--muted); }
+  .conn .id { color: var(--fg); }
+  .badge { display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(94,196,196,.13); color: var(--ft);
+    border-radius: 999px; padding: 4px 12px; font-size: 13px;
+    font-family: "SF Mono", ui-monospace, monospace; }
+  .pipeline { display: grid; grid-template-columns: 1fr 100px 1fr 100px 1fr; margin-top: 36px;
+    align-items: center; }
+  .stage-box {
+    background: #0f0f12; border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px 28px; text-align: center;
+  }
+  .stage-box .ico { font-size: 26px; line-height: 1; margin-bottom: 8px; }
+  .stage-box .name { font-size: 18px; font-weight: 600; }
+  .stage-box .meta { font-size: 12px; color: var(--faint); margin-top: 6px;
+    font-family: "SF Mono", ui-monospace, monospace; }
+  .stage-box[data-tone="gcs"] .ico { color: var(--gcs); }
+  .stage-box[data-tone="ft"] .ico { color: var(--ft); }
+  .stage-box[data-tone="bq"] .ico { color: var(--bq); }
+  .connector { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .connector .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--border);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .connector .pulse.p2 { animation-delay: 0.2s; }
+  .connector .pulse.p3 { animation-delay: 0.4s; }
+  .progress { margin-top: 36px; }
+  .progress .head { display: flex; justify-content: space-between; font-size: 13px;
+    font-family: "SF Mono", ui-monospace, monospace; color: var(--muted); margin-bottom: 8px; }
+  .bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; background: var(--accent); border-radius: 4px;
+    width: 0;
+    animation: fill 10s linear 1.2s forwards;
+  }
+  .events { margin-top: 36px; display: grid; gap: 12px; }
+  .event { font-family: "SF Mono", ui-monospace, monospace; font-size: 14px;
+    color: var(--muted); opacity: 0;
+    animation: rise 500ms ease forwards;
+  }
+  .event .t { color: var(--faint); margin-right: 12px; }
+  .event .ok { color: var(--accent); }
+  .event.e1 { animation-delay: 1.5s; }
+  .event.e2 { animation-delay: 3.5s; }
+  .event.e3 { animation-delay: 6.5s; }
+  .event.e4 { animation-delay: 9.0s; }
+  .event.e5 { animation-delay: 11.0s; }
+
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  @keyframes fill { to { width: 100%; } }
+  @keyframes pulse { 0%,100% { background: var(--border); transform: scale(1); }
+                      50% { background: var(--accent); transform: scale(1.35); } }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div style="text-align:center;">
+      <div class="kicker">Fivetran MCP &middot; sync_connection</div>
+      <h1>Synth data moves through your real pipeline</h1>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="conn">connection · <span class="id">bar_oat</span> · service · <span class="id">google_cloud_storage</span></div>
+        <span class="badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);"></span> syncing</span>
+      </div>
+
+      <div class="pipeline">
+        <div class="stage-box" data-tone="gcs">
+          <div class="ico">▣</div>
+          <div class="name">GCS</div>
+          <div class="meta">synth-staging-data</div>
+        </div>
+        <div class="connector"><span class="pulse"></span><span class="pulse p2"></span><span class="pulse p3"></span></div>
+        <div class="stage-box" data-tone="ft">
+          <div class="ico">◆</div>
+          <div class="name">Fivetran</div>
+          <div class="meta">extract → transform → load</div>
+        </div>
+        <div class="connector"><span class="pulse"></span><span class="pulse p2"></span><span class="pulse p3"></span></div>
+        <div class="stage-box" data-tone="bq">
+          <div class="ico">▤</div>
+          <div class="name">BigQuery</div>
+          <div class="meta">synth_staging.loan_applications</div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="head"><span>parquet · 5,000 rows · 838 KB</span><span>~40 s</span></div>
+        <div class="bar"><div class="fill"></div></div>
+      </div>
+
+      <div class="events">
+        <div class="event e1"><span class="t">17:39:12</span> extracting from gs://synth-staging-data/loan_applications/…2ee3.parquet</div>
+        <div class="event e2"><span class="t">17:39:24</span> processing 5,000 rows</div>
+        <div class="event e3"><span class="t">17:39:38</span> loading into synth_staging.loan_applications</div>
+        <div class="event e4"><span class="t">17:39:52</span> <span class="ok">succeeded_at advanced &middot; rows committed</span></div>
+        <div class="event e5"><span class="t">17:39:53</span> <span class="ok">✓ sync complete</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
