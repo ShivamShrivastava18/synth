@@ -131,3 +131,39 @@ def t_wait_sync(req: WaitSyncReq):
         return wait_for_sync_complete(**req.model_dump(exclude_none=True))
     except Exception as e:
         raise HTTPException(502, str(e))
+
+
+# ─── Agent trigger ────────────────────────────────────────────────────────
+# Dashboard's "New run" button POSTs here. The Gemini 3.1 Pro agent runs
+# in a daemon thread; HTTP returns immediately with the planned run_id-less
+# acknowledgement (the agent mints its own run_id and the dashboard picks
+# it up via Firestore polling).
+import threading
+import uuid as _uuid
+
+
+class TriggerReq(BaseModel):
+    source_table: str = "loan_applications"
+    destination_table: Optional[str] = None
+    target_col: Optional[str] = "loan_status"
+
+
+@app.post("/agent/trigger")
+def trigger_agent(req: TriggerReq):
+    # Local import so the tool host can still load even if vertexai isn't
+    # installed (graceful degradation for the test suite).
+    from gemini_agent import run_agent
+
+    dest = req.destination_table or req.source_table
+    trace_id = str(_uuid.uuid4())[:8]
+
+    def _go():
+        try:
+            print(f"[agent {trace_id}] starting source={req.source_table} target={req.target_col}", flush=True)
+            result = run_agent(req.source_table, dest, req.target_col)
+            print(f"[agent {trace_id}] done turns={result.get('turns')} calls={len(result.get('tool_calls', []))}", flush=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"[agent {trace_id}] crashed: {e}", flush=True)
+
+    threading.Thread(target=_go, daemon=True).start()
+    return {"status": "started", "trace_id": trace_id}

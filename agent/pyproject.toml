@@ -9,6 +9,7 @@ dependencies = [
   "httpx>=0.27",
   "pydantic>=2.8",
   "google-cloud-firestore>=2.18",
+  "google-cloud-aiplatform>=1.70",
 ]
 
 [project.optional-dependencies]

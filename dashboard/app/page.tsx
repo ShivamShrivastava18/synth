@@ -15,6 +15,7 @@ export default function Page() {
   const [runs, setRuns] = useState<RunDocClient[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [triggering, setTriggering] = useState(false);
 
   const selected = runs.find((r) => r.id === selectedId) ?? null;
 
@@ -69,8 +70,20 @@ export default function Page() {
             ...(selected ? [{ label: fmtRunId(selected.id), muted: true }] : []),
           ]}
           right={
-            <Button variant="ghost" size="sm">
-              <span>New run</span>
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={triggering}
+              onClick={async () => {
+                setTriggering(true);
+                try {
+                  await fetch("/api/trigger", { method: "POST" });
+                } finally {
+                  setTriggering(false);
+                }
+              }}
+            >
+              <span>{triggering ? "Triggering…" : "New run"}</span>
               <kbd className="f-mono text-2xs text-fg-faint border border-border-soft px-1 rounded-xs ml-1">N</kbd>
             </Button>
           }

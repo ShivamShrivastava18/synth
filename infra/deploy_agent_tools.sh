@@ -9,7 +9,7 @@ if [[ -z "${ENGINE_URL:-}" ]]; then
   exit 1
 fi
 
-ENV_VARS="ENGINE_URL=${ENGINE_URL},GOOGLE_CLOUD_PROJECT=${PROJECT_ID}"
+ENV_VARS="ENGINE_URL=${ENGINE_URL},TOOLS_URL=https://synth-agent-tools-2x7iaokvka-uc.a.run.app,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},PROJECT_ID=${PROJECT_ID},VERTEX_LOCATION=${VERTEX_LOCATION:-global},MODEL_PRIMARY=${MODEL_PRIMARY:-gemini-3.1-pro-preview}"
 if [[ -n "${SLACK_WEBHOOK_URL:-}" ]]; then
   ENV_VARS="${ENV_VARS},SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}"
 fi
@@ -25,11 +25,11 @@ gcloud run deploy "$SERVICE" \
   --region "$REGION" \
   --project "$PROJECT_ID" \
   --allow-unauthenticated \
-  --memory 1Gi \
-  --cpu 1 \
+  --memory 2Gi \
+  --cpu 2 \
   --timeout 1800 \
-  --min-instances 0 \
-  --max-instances 3 \
+  --min-instances 1 \
+  --max-instances 2 \
   --set-env-vars "$ENV_VARS" \
   --quiet
 

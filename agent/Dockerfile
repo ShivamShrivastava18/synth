@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir .
 
 COPY tools ./tools
-COPY tool_server.py ./
+COPY tool_server.py gemini_agent.py ./
 
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
