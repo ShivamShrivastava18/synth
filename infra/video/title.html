@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Synth</title>
+<style>
+  :root {
+    --bg:#0a0a0b;
+    --fg:#e8e8e6;
+    --muted:#a0a09a;
+    --faint:#6a6a64;
+    --accent:#34d399;
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    width: 1920px; height: 1080px; overflow: hidden; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+  .mark {
+    display: inline-flex; align-items: center; gap: 22px;
+    opacity: 0; transform: translateY(8px);
+    animation: rise 900ms cubic-bezier(.22,1,.36,1) 200ms forwards;
+  }
+  .square {
+    position: relative; width: 50px; height: 50px;
+    border: 1.5px solid #25252b; background: #16161a; border-radius: 8px;
+  }
+  .square::after {
+    content: ""; position: absolute; right: -6px; bottom: -6px;
+    width: 22px; height: 22px; background: var(--accent); border-radius: 5px;
+  }
+  .name {
+    font-size: 88px; font-weight: 700; letter-spacing: -0.04em; line-height: 1;
+  }
+  .tag {
+    color: var(--muted); font-size: 26px; letter-spacing: -0.015em; opacity: 0;
+    animation: fade 800ms ease 800ms forwards;
+  }
+  .meta {
+    color: var(--faint); font-size: 16px; font-family: "SF Mono", ui-monospace, monospace;
+    letter-spacing: 0.12em; text-transform: uppercase; opacity: 0;
+    animation: fade 800ms ease 1300ms forwards; margin-top: 36px;
+  }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  @keyframes fade { to { opacity: 1; } }
+</style>
+</head>
+<body>
+  <div class="mark">
+    <span class="square"></span>
+    <span class="name">Synth</span>
+  </div>
+  <div class="tag">Autonomous synthetic data for staging</div>
+  <div class="meta">Google Cloud Rapid Agent Hackathon &middot; Fivetran track</div>
+</body>
+</html>

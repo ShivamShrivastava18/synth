@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Synth</title>
+<style>
+  :root { --bg:#0a0a0b; --fg:#e8e8e6; --muted:#a0a09a; --faint:#6a6a64; --accent:#34d399; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    width: 1920px; height: 1080px; overflow: hidden; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+  .mark { display: inline-flex; align-items: center; gap: 22px;
+    opacity: 0; animation: fade 700ms ease 100ms forwards; }
+  .square { position: relative; width: 50px; height: 50px;
+    border: 1.5px solid #25252b; background: #16161a; border-radius: 8px; }
+  .square::after { content: ""; position: absolute; right: -6px; bottom: -6px;
+    width: 22px; height: 22px; background: var(--accent); border-radius: 5px; }
+  .name { font-size: 96px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+  .stack { display: flex; gap: 80px; align-items: center; font-size: 22px; color: var(--muted);
+    opacity: 0; animation: fade 700ms ease 500ms forwards; }
+  .stack span { display: inline-flex; align-items: center; gap: 10px; }
+  .stack .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .url { font-family: "SF Mono", ui-monospace, monospace; font-size: 22px; color: var(--accent);
+    opacity: 0; animation: fade 700ms ease 900ms forwards; letter-spacing: -0.005em; }
+  .meta { color: var(--faint); font-size: 13px; font-family: "SF Mono", ui-monospace, monospace;
+    letter-spacing: 0.16em; text-transform: uppercase; opacity: 0;
+    animation: fade 700ms ease 1300ms forwards; margin-top: 24px; }
+  @keyframes fade { to { opacity: 1; } }
+</style>
+</head>
+<body>
+  <div class="mark">
+    <span class="square"></span>
+    <span class="name">Synth</span>
+  </div>
+  <div class="stack">
+    <span><span class="pip"></span>Gemini 3.1 Pro</span>
+    <span><span class="pip"></span>Agent Builder</span>
+    <span><span class="pip"></span>Fivetran MCP</span>
+  </div>
+  <div class="url">github.com/ShivamShrivastava18/synth</div>
+  <div class="meta">Built in 14 days &middot; Open source</div>
+</body>
+</html>
